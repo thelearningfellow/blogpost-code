@@ -20,7 +20,7 @@ async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 # SSE endpoint to stream metrics 
-@app.get("/events/metrics")
+@app.get("/metrics")
 async def message_stream(request: Request):
     """
     Streams CPU, memory, and disk utilization data to the client using Server-Sent Events.
@@ -52,14 +52,13 @@ async def message_stream(request: Request):
                 json_data = json.dumps(system_metrics)
 
                 # Format the data as an SSE data message
-                # The 'data:' line should contain the JSON string
-                yield f"{json_data}\n\n"
+                yield f"{json_data}"
 
             except Exception as e:
                 # Log any errors but keep the generator running
                 print(f"Error getting system utilization: {e}")
                 # Send an error message to the client if needed
-                yield f"data: {json.dumps({'error': str(e)})}\n\n"
+                yield f"{json.dumps({'error': str(e)})}"
 
 
     # Return an EventSourceResponse which handles the SSE protocol
