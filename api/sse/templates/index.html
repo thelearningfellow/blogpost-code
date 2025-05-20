@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Metrics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 1rem; /* Add some padding for smaller screens */
+        }
+        .dashboard-container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%; /* Full width on small screens */
+            max-width: 600px; /* Max width for larger screens */
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem; /* Space between metric blocks */
+        }
+        .metric-block {
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            background-color: #f7fafc;
+        }
+        .metric-label {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+        .metric-value {
+            font-size: 1.5rem; /* Slightly smaller font for individual metrics */
+            font-weight: bold;
+            color: #1a202c;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1 class="text-2xl font-bold mb-4">System Metrics Dashboard</h1>
+
+        <div class="metric-block">
+            <div class="metric-label">CPU Utilization:</div>
+            <div id="cpu-utilization" class="metric-value">Loading...</div>
+        </div>
+
+        <div class="metric-block">
+            <div class="metric-label">Memory Utilization:</div>
+            <div id="memory-utilization" class="metric-value">Loading...</div>
+        </div>
+
+        <div class="metric-block">
+            <div class="metric-label">Disk Utilization (/):</div>
+            <div id="disk-utilization" class="metric-value">Loading...</div>
+        </div>
+
+        <div id="status-message" class="text-sm text-gray-600 mt-4">Connecting...</div>
+    </div>
+
+    <script>
+        // Create a new EventSource connection to the /events endpoint
+        const eventSource = new EventSource("/events/metrics");
+
+        // Get the div elements where we will display the metrics
+        const cpuUtilizationElement = document.getElementById("cpu-utilization");
+        const memoryUtilizationElement = document.getElementById("memory-utilization");
+        const diskUtilizationElement = document.getElementById("disk-utilization");
+        const statusMessageElement = document.getElementById("status-message");
+
+        // Event listener for incoming messages
+        eventSource.onmessage = function(event) {
+            try {
+                const systemMetrics = JSON.parse(event.data);
+                console.log("Received SSE data:", systemMetrics);
+
+                // Check if the data contains an error message
+                if (systemMetrics.error) {
+                    statusMessageElement.textContent = `Server Error: ${systemMetrics.error}`;
+                    cpuUtilizationElement.textContent = "N/A";
+                    memoryUtilizationElement.textContent = "N/A";
+                    diskUtilizationElement.textContent = "N/A";
+                } else {
+                    cpuUtilizationElement.textContent = `${systemMetrics.cpu_percent}%`;
+                    memoryUtilizationElement.textContent = `${systemMetrics.memory_percent}%`;
+                    diskUtilizationElement.textContent = `${systemMetrics.disk_percent}%`;
+                    statusMessageElement.textContent = "Connected"; 
+                }
+
+            } catch (e) {
+                console.error("Error parsing JSON or updating UI:", e);
+                statusMessageElement.textContent = "Error processing data.";
+            }
+        };
+
+        eventSource.onerror = function(err) {
+            console.error("EventSource failed:", err);
+            statusMessageElement.textContent = "Connection failed. Retrying...";
+        };
+
+        eventSource.onopen = function() {
+            console.log("EventSource connection opened.");
+            statusMessageElement.textContent = "Connected";
+        };
+    </script>
+</body>
+</html>
