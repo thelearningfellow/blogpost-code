@@ -30,6 +30,7 @@ Run DeepSeek OCR to convert the PDF doc to markdown
 ```sh
 python run_ocr.py DeepSeek_OCR_paper.pdf output --combine --model_setting tiny
 ```
+DeepSeek OCR has multiple configurations and those can be selected using the `--model_setting` parameter of the script.
 
 If you want to check other options available simply run
 ```sh
