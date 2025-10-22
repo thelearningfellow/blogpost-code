@@ -17,6 +17,9 @@ def main():
     parser = argparse.ArgumentParser(description="Run OCR on a PDF file.")
     parser.add_argument("pdf_path", help="Path to the input PDF file.")
     parser.add_argument("output_path", help="Path to the output directory.")
+    parser.add_argument("--combine", action="store_true", help="Combine all .mmd files into a single file.")
+    parser.add_argument("--combined_filename", default="combined.mmd", help="Name of the combined file.")
+    parser.add_argument("--keep_individual_files", action="store_true", help="Keep individual .mmd files after combining.")
     args = parser.parse_args()
 
     # Create output directory if it doesn't exist
@@ -38,7 +41,7 @@ def main():
         image_path = os.path.join(args.output_path, f"page_{i+1}.jpg")
         image.save(image_path, "JPEG")
 
-        res = model.infer(
+        model.infer(
             tokenizer,
             prompt=prompt,
             image_file=image_path,
@@ -59,6 +62,21 @@ def main():
         os.remove(image_path)
 
         print(f"Processed page {i+1}")
+
+    # Combine all .mmd files into a single file
+    if args.combine:
+        combined_content = ""
+        # Ensure the files are sorted by page number
+        mmd_files = sorted([f for f in os.listdir(args.output_path) if f.endswith('.mmd') and f[:-4].isdigit()], key=lambda x: int(x[:-4]))
+        for mmd_file in mmd_files:
+            mmd_file_path = os.path.join(args.output_path, mmd_file)
+            with open(mmd_file_path, "r") as f:
+                combined_content += f.read() + "\n"
+            if not args.keep_individual_files:
+                os.remove(mmd_file_path)
+        
+        with open(os.path.join(args.output_path, args.combined_filename), "w") as f:
+            f.write(combined_content)
 
 if __name__ == "__main__":
     main()
