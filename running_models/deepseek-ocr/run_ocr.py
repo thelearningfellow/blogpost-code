@@ -5,14 +5,6 @@ import argparse
 import fitz  # PyMuPDF
 from PIL import Image
 
-os.environ["CUDA_VISIBLE_DEVICES"] = '0'
-
-model_name = 'deepseek-ai/DeepSeek-OCR'
-
-tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-model = AutoModel.from_pretrained(model_name, _attn_implementation='flash_attention_2', trust_remote_code=True, use_safetensors=True)
-model = model.eval().cuda().to(torch.bfloat16)
-
 def combine_files(output_path, combined_filename, keep_individual_files):
     combined_content = ""
     # Ensure the files are sorted by page number
@@ -51,6 +43,14 @@ def main():
     base_size = selected_setting["base_size"]
     image_size = selected_setting["image_size"]
     crop_mode = selected_setting["crop_mode"]
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+
+    model_name = 'deepseek-ai/DeepSeek-OCR'
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    model = AutoModel.from_pretrained(model_name, _attn_implementation='flash_attention_2', trust_remote_code=True, use_safetensors=True)
+    model = model.eval().cuda().to(torch.bfloat16)
 
     # Create output directory if it doesn't exist
     if not os.path.exists(args.output_path):

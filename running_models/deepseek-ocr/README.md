@@ -28,7 +28,7 @@ wget https://github.com/deepseek-ai/DeepSeek-OCR/raw/main/DeepSeek_OCR_paper.pdf
 
 Run DeepSeek OCR to convert the PDF doc to markdown
 ```sh
-python run_ocr.py DeepSeek_OCR_paper.pdf output --combine
+python run_ocr.py DeepSeek_OCR_paper.pdf output --combine --model_setting tiny
 ```
 
 If you want to check other options available simply run
