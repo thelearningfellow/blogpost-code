@@ -49,6 +49,15 @@ def main():
             save_results=True,
             test_compress=True
         )
+        
+        # Rename the output file
+        old_file_path = os.path.join(args.output_path, "result.mmd")
+        new_file_path = os.path.join(args.output_path, f"page_{i+1}.mmd")
+        os.rename(old_file_path, new_file_path)
+
+        # Remove the temporary image file
+        os.remove(image_path)
+
         print(f"Processed page {i+1}")
 
 if __name__ == "__main__":
