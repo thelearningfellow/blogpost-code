@@ -55,7 +55,7 @@ def main():
         
         # Rename the output file
         old_file_path = os.path.join(args.output_path, "result.mmd")
-        new_file_path = os.path.join(args.output_path, f"page_{i+1}.mmd")
+        new_file_path = os.path.join(args.output_path, f"{i+1}.mmd")
         os.rename(old_file_path, new_file_path)
 
         # Remove the temporary image file
